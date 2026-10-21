@@ -1,4 +1,3 @@
-
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -8,7 +7,7 @@ import org.junit.Test;
 public class LongStackTest {
 
    @Test (timeout=1000)
-   public void testNewStack() { 
+   public void testNewStack() {
       LongStack m = new LongStack();
       assertTrue ("new stack must be empty;", m.stEmpty());
       m.push (1);
@@ -24,9 +23,9 @@ public class LongStackTest {
       long i1 = m.pop();
       long i2 = m.pop();
       assertTrue ("After two pushes and two pops stack must be empty;",
-         m.stEmpty());
+              m.stEmpty());
       assertTrue ("LIFO order must hold: 6 -3 returns -3 first;",
-         (i1 == -3) && (i2 == 6));
+              (i1 == -3) && (i2 == 6));
    }
 
    @Test (timeout=1000)
@@ -44,7 +43,7 @@ public class LongStackTest {
       m.op ("+");
       tt = m.pop();
       assertTrue ("2147483649 + 2147483648 must be 4294967297; ",
-         tt==4294967297L); 
+              tt==4294967297L);
       m.push (5);
       m.push (3);
       m.op ("-");
@@ -63,7 +62,7 @@ public class LongStackTest {
       tt = m.pop();
       assertTrue ("51 / 3 must be 17; ", tt==17);
       assertTrue ("push push op pop must not grow the stack; ", m.stEmpty());
-   } 
+   }
 
    @Test (timeout=1000)
    public void testTos() {
@@ -93,11 +92,11 @@ public class LongStackTest {
       assertFalse ("1 0 and 1 3 must not be equal;", m1.equals(m2));
       m1.pop();
       m2.pop();
-      assertTrue ("1 in stacks with different history, stacks must be equal;", 
-         m1.equals(m2));
+      assertTrue ("1 in stacks with different history, stacks must be equal;",
+              m1.equals(m2));
       m1.pop();
-      assertFalse ("first empty, second contains 1, must not be equal;", 
-         m1.equals(m2));
+      assertFalse ("first empty, second contains 1, must not be equal;",
+              m1.equals(m2));
    }
 
    @Test (expected=RuntimeException.class)
@@ -139,9 +138,9 @@ public class LongStackTest {
       m.push (2);
       String s2 = m.toString().substring (0, 3);
       assertEquals (
-   "top must be the last element; toString from bottom must start with -8 7  ", 
-         s1, s2);
-   } 
+              "top must be the last element; toString from bottom must start with -8 7  ",
+              s1, s2);
+   }
 
    @Test (expected=RuntimeException.class)
    public void testTosUnderflow() {
@@ -205,23 +204,23 @@ public class LongStackTest {
    public void testInterpretLong() {
       String s = "1 -10 4 8 3 - + * +";
       assertEquals ("expression: " + Aout.toString (s), -89,
-         LongStack.interpret (s));
+              LongStack.interpret (s));
       s = "156 154 152 - 3 + -";
       assertEquals ("expression: " + Aout.toString (s), 151,
-         LongStack.interpret (s));
+              LongStack.interpret (s));
    }
 
    @Test (timeout=1000)
    public void testInterpretTokenizer() {
       String s = "1  2    +";
-      assertEquals ("expression: " + Aout.toString (s), 3, 
-         LongStack.interpret (s));
+      assertEquals ("expression: " + Aout.toString (s), 3,
+              LongStack.interpret (s));
       s = "   \t \t356  \t \t";
       assertEquals ("expression: " + Aout.toString (s), 356,
-         LongStack.interpret (s));
+              LongStack.interpret (s));
       s = "\t2 \t5 +   \t";
-      assertEquals ("expression: " + Aout.toString (s), 7, 
-         LongStack.interpret (s));
+      assertEquals ("expression: " + Aout.toString (s), 7,
+              LongStack.interpret (s));
    }
 
    @Test (expected=RuntimeException.class)
@@ -269,10 +268,47 @@ public class LongStackTest {
       LongStack.interpret ("2 5 + -");
    }
 
-  @Test (expected=RuntimeException.class)
+   @Test (expected=RuntimeException.class)
    public void testTooFewNumbers3() {
       LongStack.interpret ("+");
    }
 
-}
+   // ===================== R-pinu (>R, R>, R@) testid =====================
 
+   @Test (timeout=1000)
+   public void testRStackExamples() {
+      String s = "3 >R R@ R> *";
+      assertEquals("expression: " + s + " must be 3*3 = 9;",
+              9, LongStack.interpret(s));
+      s = "30 6 >R R@ / R> -";
+      assertEquals ("expression: " + s + " must be 30/6-6 = -1;",
+              -1, LongStack.interpret (s));
+      s = "50 8 >R 2 >R R> R> - -";
+      assertEquals ("expression: " + s + " must be 50-(2-8) = 56;",
+              56, LongStack.interpret (s));
+      s = "2 6 >R 3 R@ * - R> -";
+      assertEquals ("expression: " + s + " must be 2-3*6-6 = -22;",
+              -22, LongStack.interpret (s));
+   }
+
+   @Test (expected=RuntimeException.class)
+   public void testRStackNotEmpty() {
+      LongStack.interpret ("7 2 >R");
+   }
+
+   @Test (expected=RuntimeException.class)
+   public void testToRUnderflow() {
+      LongStack.interpret (">R 4");
+   }
+
+   @Test (expected=RuntimeException.class)
+   public void testFromRUnderflow() {
+      LongStack.interpret ("6 R> -");
+   }
+
+   @Test (expected=RuntimeException.class)
+   public void testFetchRUnderflow() {
+      LongStack.interpret ("6 >R R> R@ -");
+   }
+
+}

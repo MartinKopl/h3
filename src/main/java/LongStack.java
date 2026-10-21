@@ -14,7 +14,9 @@ public class LongStack {
    private Node top;
 
    public static void main (String[] argum) {
-      // TODO!!! Your tests here!
+      System.out.println(interpret("15 7 3 >R - R> -"));     // 5
+      System.out.println(interpret("3 >R R@ R> *"));         // 9
+      System.out.println(interpret("2 5 >R 3 R@ * - R> -")); // -18
    }
 
    LongStack() {
@@ -41,7 +43,7 @@ public class LongStack {
    }
 
    public boolean stEmpty() {
-       return top == null;
+      return top == null;
    }
 
    public void push (long a) {
@@ -86,7 +88,7 @@ public class LongStack {
          throw new RuntimeException("op: Unknown equation "+ s + ", allowed symbols +, -, *, /");
       }
    }
-  
+
    public long tos() {
       if (stEmpty()) {
          throw new RuntimeException("tos: Can't read element, stack is empty");
@@ -135,7 +137,8 @@ public class LongStack {
       if (pol == null || pol.trim().isEmpty()) { // Veatüüp a
          throw new RuntimeException("Avaldis puudub");
       }
-      LongStack stack = new LongStack();
+      LongStack stack = new LongStack();   // andmepinu
+      LongStack rstack = new LongStack();  // R-pinu (return stack)
       String[] tokens = pol.trim().split("\\s+");
 
       for (String token : tokens) {
@@ -146,19 +149,49 @@ public class LongStack {
                throw new RuntimeException("Viga avaldises \"" + pol + "\" tehtel \"" + token + "\": " + e.getMessage());
             }
          }
+         else if (token.equals(">R")) {
+            // andmepinus ( a -- ), R-pinus ( -- a )
+            if (stack.stEmpty()) {
+               throw new RuntimeException("Viga avaldises \"" + pol
+                       + "\": >R ei saa täita, andmepinu on tühi");
+            }
+            rstack.push(stack.pop());
+         }
+         else if (token.equals("R>")) {
+            // andmepinus ( -- a ), R-pinus ( a -- )
+            if (rstack.stEmpty()) {
+               throw new RuntimeException("Viga avaldises \"" + pol
+                       + "\": R> ei saa täita, R-pinu on tühi");
+            }
+            stack.push(rstack.pop());
+         }
+         else if (token.equals("R@")) {
+            // andmepinus ( -- a ), R-pinus ( a -- a )
+            if (rstack.stEmpty()) {
+               throw new RuntimeException("Viga avaldises \"" + pol
+                       + "\": R@ ei saa täita, R-pinu on tühi");
+            }
+            stack.push(rstack.tos());
+         }
          else {
             try {
                stack.push(Long.parseLong(token));
-            } catch (NumberFormatException e) { // Veatüüp cd
-               throw new RuntimeException("Lubamatu sümbol " + token + "\" avaldises \"" + pol + "\"");
+            } catch (NumberFormatException e) { // Veatüüp c
+               throw new RuntimeException("Lubamatu sümbol \"" + token + "\" avaldises \"" + pol + "\"");
             }
          }
       }
+      if (!rstack.stEmpty()) {
+         throw new RuntimeException("Avaldises \"" + pol
+                 + "\" jäi R-pinu lõpus tühjaks tegemata: " + rstack);
+      }
+      if (stack.stEmpty()) {
+         throw new RuntimeException("Avaldises \"" + pol + "\" ei jäänud andmepinusse tulemust");
+      }
       long result = stack.pop();
       if (!stack.stEmpty()) { // Veatüüp b
-         throw new RuntimeException("Avaldises \"" + pol + "\" liiga palju arve\"");
+         throw new RuntimeException("Avaldises \"" + pol + "\" liiga palju arve");
       }
       return result;
    }
 }
-
